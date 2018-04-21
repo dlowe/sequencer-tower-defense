@@ -30,6 +30,23 @@ footer_text = {
    ""
 }
 
+-- particles
+particles = {}
+function move_particles()
+   local new_particles = {}
+   for i=1,#particles do
+      local p=particles[i]
+      if p.active_until > tick then
+         p.x += p.dx * p.speed
+         p.y += p.dy * p.speed
+         new_particles[#new_particles + 1] = p
+      else
+         -- printh("despawning particle " .. i)
+      end
+   end
+   particles = new_particles
+end
+
 solution = {}
 function solve()
    for x=0,16 do
@@ -141,6 +158,17 @@ function activate(x, y)
          c.health -= 1
          if c.health <= 0 then
             c.alive = false
+            for n=1,c.max_health+flr(rnd(10)) do
+               particles[#particles + 1] = {
+                  x=c.x+4,
+                  y=c.y+4,
+                  active_until=tick+10+flr(rnd(30)),
+                  speed=rnd(3),
+                  dx=flr(rnd(3))-1,
+                  dy=flr(rnd(3))-1,
+                  col=c.particle_color
+               }
+            end
             if (walkthrough_state == 5) walkthrough_state = 6
          end
       end
@@ -198,7 +226,8 @@ function spawn_creep(y)
       speed=0.4,
       alive=true,
       health=10,
-      max_health=10
+      max_health=10,
+      particle_color=9
    }
 end
 
@@ -266,6 +295,7 @@ function _update()
    if (moved and walkthrough_state == 1) walkthrough_state = 2
    maybe_spawn_creep()
    move_creeps()
+   move_particles()
 end
 
 function _draw()
@@ -297,6 +327,11 @@ function _draw()
           line(c.x+1,c.y+1,c.x+6,c.y+1,8)
           line(c.x+1,c.y+1,c.x+1+(5*c.health/c.max_health),c.y+1,11)
        end
+    end
+
+    --particles
+    for i=1,#particles do
+       pset(particles[i].x, particles[i].y, particles[i].col)
     end
 
     --sequencer position

@@ -20,4 +20,4 @@
  * [ ] creep 3 sprites
  * [ ] creep 3 behavior
  * [ ] waves: 8 second delay, then increasingly difficult waves of creeps
- * [ ] creep death effect
+ * [x] creep death effect
