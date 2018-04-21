@@ -26,9 +26,14 @@ footer_text = {
    "  use \142 to place/change towers",
    "   keep the rhythm with \151",
    "",
-   " here comes a creep! blast it!",
-   ""
+   " here comes a creep! blast it!"
 }
+
+-- waves
+wave = 0
+wave_warn_tick = nil
+wave_begin_tick = nil
+wave_todo = 0
 
 -- particles
 particles = {}
@@ -45,6 +50,22 @@ function move_particles()
       end
    end
    particles = new_particles
+end
+
+-- rings
+rings = {}
+function move_rings()
+   local new_rings = {}
+   for i=1,#rings do
+      local r=rings[i]
+      if r.active_until > tick then
+         r.radius += r.speed
+         new_rings[#new_rings + 1] = r
+      else
+         --printh("despawning ring " .. i)
+      end
+   end
+   rings = new_rings
 end
 
 solution = {}
@@ -151,29 +172,56 @@ function adapt_tower(cx, cy)
    if (walkthrough_state == 2) walkthrough_state = 3
 end
 
-function activate(x, y)
-   for i=1,#creeps do
-      local c=creeps[i]
-      if c.alive then
-         c.health -= 1
-         if c.health <= 0 then
-            c.alive = false
-            for n=1,c.max_health+flr(rnd(10)) do
-               particles[#particles + 1] = {
-                  x=c.x+4,
-                  y=c.y+4,
-                  active_until=tick+10+flr(rnd(30)),
-                  speed=rnd(3),
-                  dx=rnd(3)-1,
-                  dy=rnd(3)-1,
-                  col=c.particle_color
-               }
-            end
-            if (walkthrough_state == 5) walkthrough_state = 6
+function hurt_creep(i, damage)
+   local c=creeps[i]
+   if c.alive then
+      c.health -= damage
+      if c.health <= 0 then
+         c.alive = false
+         for n=1,c.max_health+flr(rnd(10)) do
+            particles[#particles + 1] = {
+               x=c.x+4,
+               y=c.y+4,
+               active_until=tick+10+flr(rnd(30)),
+               speed=rnd(3),
+               dx=rnd(3)-1,
+               dy=rnd(3)-1,
+               col=c.particle_color
+            }
          end
       end
    end
-   --printh("X=" .. x .. ", Y=" .. y)
+end
+
+function activate(x, y)
+   local tower_type = mget(x, y)
+
+   --printh("activate tower type=" .. tower_type .. " at (" .. x .. "," .. y .. ")")
+
+   if tower_type == 1 then
+      -- thumper: hits nearby creeps hard
+      local thump = false
+      for i=1,#creeps do
+         local c = creeps[i]
+         if c.alive then
+            if (abs(c.grid_x - x) <= 2) and (abs(c.grid_y - y) <= 2) then
+               thump = true
+               hurt_creep(i, 5)
+            end
+         end
+      end
+      rings[#rings + 1] = {
+         x            = x*8+4,
+         y            = y*8+4,
+         col          = 8,
+         radius       = 0.1,
+         speed        = 3,
+         active_until = tick + 6
+      }
+   elseif tower_type == 2 then
+   elseif tower_type == 3 then
+   elseif tower_type == 4 then
+   end
 end
 
 rhythm_cooldown_ticks = 5
@@ -235,19 +283,27 @@ function maybe_spawn_creep()
    if (walkthrough_state < 4) return
 
    if (walkthrough_state == 4) then
-      for spawn_y=7,1,-1 do
-         if (mget(0, spawn_y) == 0) then
-            spawn_creep(spawn_y)
-            break
-         end
+      local spawn_y = 7
+      while solution[0][spawn_y].reachable == false do
+         spawn_y = flr(rnd(13)) + 1
       end
+      spawn_creep(spawn_y)
       walkthrough_state = 5
    end
 
-   -- TODO: actual creep wave spawning
+   if (walkthrough_state == 6) then
+      if tick >= wave_begin_tick and wave_todo >= 0 then
+         local spawn_y = flr(rnd(13)) + 1
+         if (solution[0][spawn_y].reachable == true) then
+            spawn_creep(spawn_y)
+            wave_todo -= 1
+         end
+      end
+   end
 end
 
 function move_creeps()
+   local initial_n_creeps = #creeps
    local new_creeps = {}
    for i=1,#creeps do
       local c = creeps[i]
@@ -269,7 +325,7 @@ function move_creeps()
             c.grid_y = c.next_grid_y
             if c.grid_x == 15 then
                lives -= 1
-               c.alive = false
+               hurt_creep(i, 999)
             end
             c.next_grid_x = solution[c.grid_x][c.grid_y].path_x
             c.next_grid_y = solution[c.grid_x][c.grid_y].path_y
@@ -278,6 +334,14 @@ function move_creeps()
          end
          new_creeps[#new_creeps + 1] = c
       end
+   end
+   creeps = new_creeps
+   if initial_n_creeps > 0 and #creeps == 0 then
+      walkthrough_state = 6
+      wave += 1
+      wave_todo = 2 * wave
+      wave_warn_tick = tick + 60
+      wave_begin_tick = tick + 60 + 8 * 30
    end
 end
 
@@ -298,6 +362,7 @@ function _update()
    maybe_spawn_creep()
    move_creeps()
    move_particles()
+   move_rings()
 end
 
 function _draw()
@@ -313,8 +378,17 @@ function _draw()
 
     --footer
     line(0,120,127,120,9)
-    -- printh("XXX: " .. walkthrough_state)
-    print(footer_text[walkthrough_state], 0, 122, 8)
+    if walkthrough_state != 6 then
+       print(footer_text[walkthrough_state], 0, 122, 8)
+    else
+       if tick > wave_begin_tick then
+          print("wave " .. wave .. " in progress", 0, 122, 8)
+       elseif tick > wave_warn_tick then
+          print("wave " .. wave .. " in " .. flr((wave_begin_tick - tick) / 30), 0, 122, 8)
+       else
+          print("wave " .. (wave - 1) .. " clear!", 0, 122, 8)
+       end
+    end
 
     --cursor
     rect(cursor_x * 8, cursor_y * 8, cursor_x * 8 + 7, cursor_y * 8 + 7, 2)
@@ -334,6 +408,11 @@ function _draw()
     --particles
     for i=1,#particles do
        pset(particles[i].x, particles[i].y, particles[i].col)
+    end
+
+    --rings
+    for i=1,#rings do
+       circ(rings[i].x, rings[i].y, rings[i].radius, rings[i].col)
     end
 
     --sequencer position
