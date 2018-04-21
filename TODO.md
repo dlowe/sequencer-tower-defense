@@ -1,7 +1,8 @@
  * [x] actual pathfinding (depth first is stupid)
  * [x] check pathfinding for active creeps when building towers (otherwise we can box them in)
+ * [ ] game over behavior
  * [ ] lower tower limit from 99 to 13
- * [ ] creep damage / death
+ * [x] creep damage / death
  * [ ] scorekeeping
  * [ ] increasing tower limit over time
  * [ ] tower 1 attack
@@ -19,3 +20,4 @@
  * [ ] creep 3 sprites
  * [ ] creep 3 behavior
  * [ ] waves: 8 second delay, then increasingly difficult waves of creeps
+ * [ ] creep death effect

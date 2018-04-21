@@ -61,7 +61,7 @@ function solve()
          local ny=current.y+deltas[d].dy
 
          if (nx >= 0) and (nx <= 16) and (ny >= 1) and (ny <= 14) and (solution[nx][ny].reachable == false) and (mget(nx, ny) == 0) then
-            printh("solved: (" .. nx .. "," .. ny .. ") -> (" .. current.x .. "," .. current.y .. ")")
+            --printh("solved: (" .. nx .. "," .. ny .. ") -> (" .. current.x .. "," .. current.y .. ")")
             -- add solution
             solution[nx][ny] = {
                reachable = true,
@@ -137,6 +137,17 @@ function adapt_tower(cx, cy)
 end
 
 function activate(x, y)
+   for i=1,#creeps do
+      if creeps[i].alive then
+         creeps[i].health -= 1
+         if creeps[i].health <= 0 then
+            creeps[i].alive = false
+            if walkthrough_state == 5 then
+               walkthrough_state = 6
+            end
+         end
+      end
+   end
    --printh("X=" .. x .. ", Y=" .. y)
 end
 
@@ -188,7 +199,9 @@ function spawn_creep(y)
       y=y*8,
       sprite=16,
       speed=0.4,
-      alive=true
+      alive=true,
+      health=10,
+      max_health=10
    }
 end
 
@@ -279,7 +292,11 @@ function _draw()
     --creeps
     for i=1,#creeps do
        if creeps[i].alive then
+          -- sprite
           spr(creeps[i].sprite,creeps[i].x,creeps[i].y)
+          -- health bar
+          line(creeps[i].x+1,creeps[i].y+1,creeps[i].x+6,creeps[i].y+1,8)
+          line(creeps[i].x+1,creeps[i].y+1,creeps[i].x+1+(5 * (creeps[i].health / creeps[i].max_health)),creeps[i].y+1,11)
        end
     end
 
