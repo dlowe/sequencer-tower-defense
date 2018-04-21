@@ -24,52 +24,55 @@ walkthrough_state = 1
 footer_text = {
    "use \139\145\148\131 to move your cursor",
    "  use \142 to place/change towers",
-   "     keep the beat with \151",
+   "   keep the rhythm with \151",
    "",
-   "  here comes a creep! blast it!",
+   " here comes a creep! blast it!",
    ""
 }
 
-function _path(so_far, visited, start_x, start_y)
-   --printh("start_x: " .. start_x)
-   --printh("start_y: " .. start_y)
-   if (start_x < 0) return nil
-   if (start_y < 1) return nil
-   if (start_x > 16) return nil
-   if (start_y > 14) return nil
-   if (visited[start_x][start_y] == 1) return nil
-   if (mget(start_x, start_y) != 0) return nil
-
-   visited[start_x][start_y] = 1
-   so_far[#so_far + 1] = {x=start_x, y=start_y}
-   
-   -- we're there
-   if (start_x == 16) return so_far
-
-   -- recur
-   local p = nil
-   p = _path(so_far, visited, start_x + 1, start_y)
-   if (p != nil) return p
-   p = _path(so_far, visited, start_x, start_y + 1)
-   if (p != nil) return p
-   p = _path(so_far, visited, start_x, start_y - 1)
-   if (p != nil) return p
-   p = _path(so_far, visited, start_x - 1, start_y)
-   if (p != nil) return p
-
-   return nil
-end
-
-function path(start_x, start_y)
-   local so_far = {}
-   local visited = {}
+solution = {}
+function solve()
    for x=0,16 do
-      visited[x] = {}
+      solution[x] = {}
       for y=1,14 do
-         visited[x][y] = 0
+         solution[x][y] = {
+            reachable = false
+         }
       end
    end
-   return _path(so_far, visited, start_x, start_y)
+
+   local queue = {}
+   for y=1,14 do
+      queue[#queue + 1] = {x=16,y=y}
+   end
+
+   while #queue != 0 do
+      -- "pop"  the first element of the queue
+      local current = queue[1]
+      local new_queue = {}
+      for i=2,#queue do
+         new_queue[#new_queue + 1] = queue[i]
+      end
+      queue = new_queue
+
+      local deltas={{dx=-1,dy=0},{dx=0,dy=-1},{dx=0,dy=1},{dx=1,dy=0}}
+      for d=1,#deltas do
+         local nx=current.x+deltas[d].dx
+         local ny=current.y+deltas[d].dy
+
+         if (nx >= 0) and (nx <= 16) and (ny >= 1) and (ny <= 14) and (solution[nx][ny].reachable == false) and (mget(nx, ny) == 0) then
+            printh("solved: (" .. nx .. "," .. ny .. ") -> (" .. current.x .. "," .. current.y .. ")")
+            -- add solution
+            solution[nx][ny] = {
+               reachable = true,
+               path_x = current.x,
+               path_y = current.y
+            }
+            -- push to queue
+            queue[#queue + 1] = {x=nx, y=ny}
+         end
+      end
+   end
 end
 
 function adapt_tower(cx, cy)
@@ -82,8 +85,10 @@ function adapt_tower(cx, cy)
 
       -- can't place on top of a creep
       for i=1,#creeps do
-         if ((creeps[i].grid_x == cx) and (creeps[i].grid_y == cy)) return nil
-         if ((creeps[i].next_grid_x == cx) and (creeps[i].next_grid_y == cy)) return nil
+         if creeps[i].alive then
+            if ((creeps[i].grid_x == cx) and (creeps[i].grid_y == cy)) return nil
+            if ((creeps[i].next_grid_x == cx) and (creeps[i].next_grid_y == cy)) return nil
+         end
       end
 
       -- limit of 4 towers per column
@@ -95,19 +100,29 @@ function adapt_tower(cx, cy)
       end
       if (count > 3) return nil
 
-      -- not allowed to block left->right pathfinding
+      -- not allowed to block left->right pathfinding, or pathfinding of active creeps
       mset(cx, cy, 1)
+      solve()
       local solvable = false
       for ypos=1,14 do
-         if path(0, ypos) != nil then
+         if solution[0][ypos].reachable == true then
             solvable = true
             break
          end
       end
+      for i=1,#creeps do
+         if creeps[i].alive then
+            if solution[creeps[i].grid_x][creeps[i].grid_y].reachable == false then
+               solvable = false
+               break
+            end
+         end
+      end
       mset(cx, cy, 0)
-      if (solvable == false) return nil
-
-      -- TODO: not allowed to place on top of a creep
+      if (solvable == false) then
+         solve()
+         return nil
+      end
 
       towers += 1
    end
@@ -172,7 +187,7 @@ function spawn_creep(y)
       x=-5,
       y=y*8,
       sprite=16,
-      speed=0.1,
+      speed=0.4,
       alive=true
    }
 end
@@ -208,16 +223,17 @@ function move_creeps()
          elseif creeps[i].y > dest_y then
             creeps[i].y = max(dest_y, creeps[i].y - creeps[i].speed)
          else
-            --we are lined up with our next grid location, so pathfind to the next grid location
+            --we are lined up with our next grid location, so figure out the next step
             creeps[i].grid_x = creeps[i].next_grid_x
             creeps[i].grid_y = creeps[i].next_grid_y
-            local path = path(creeps[i].grid_x, creeps[i].grid_y)
-            if (path == nil) or (#path < 3) then
+            if creeps[i].grid_x == 15 then
                lives -= 1
                creeps[i].alive = false
             end
-            creeps[i].next_grid_x = path[2].x
-            creeps[i].next_grid_y = path[2].y
+            creeps[i].next_grid_x = solution[creeps[i].grid_x][creeps[i].grid_y].path_x
+            creeps[i].next_grid_y = solution[creeps[i].grid_x][creeps[i].grid_y].path_y
+
+            --printh("aiming for (" .. creeps[i].next_grid_x .. ", " .. creeps[i].next_grid_y .. ")")
          end
       end
    end
