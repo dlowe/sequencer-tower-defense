@@ -111,7 +111,7 @@ function adapt_tower(cx, cy)
          end
       end
       for i=1,#creeps do
-         if creeps[i].alive then
+         if creeps[i].alive and creeps[i].grid_x >= 0 then
             if solution[creeps[i].grid_x][creeps[i].grid_y].reachable == false then
                solvable = false
                break
