@@ -22,3 +22,6 @@
  * [x] waves: 8 second delay, then increasingly difficult waves of creeps
  * [x] creep death effect
  * [ ] per-tower damage cap
+ * [ ] increasing creep health over time
+ * [ ] "rush" vs "spread out" spawning
+ * [ ] pre-defined first few levels to introduce new creeps
