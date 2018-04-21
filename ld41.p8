@@ -164,8 +164,8 @@ function activate(x, y)
                   y=c.y+4,
                   active_until=tick+10+flr(rnd(30)),
                   speed=rnd(3),
-                  dx=flr(rnd(3))-1,
-                  dy=flr(rnd(3))-1,
+                  dx=rnd(3)-1,
+                  dy=rnd(3)-1,
                   col=c.particle_color
                }
             end
@@ -248,6 +248,7 @@ function maybe_spawn_creep()
 end
 
 function move_creeps()
+   local new_creeps = {}
    for i=1,#creeps do
       local c = creeps[i]
       if c.alive then
@@ -275,6 +276,7 @@ function move_creeps()
 
             --printh("aiming for (" .. creeps[i].next_grid_x .. ", " .. creeps[i].next_grid_y .. ")")
          end
+         new_creeps[#new_creeps + 1] = c
       end
    end
 end
