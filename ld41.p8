@@ -85,18 +85,17 @@ function adapt_tower(cx, cy)
 
       -- can't place on top of a creep
       for i=1,#creeps do
-         if creeps[i].alive then
-            if ((creeps[i].grid_x == cx) and (creeps[i].grid_y == cy)) return nil
-            if ((creeps[i].next_grid_x == cx) and (creeps[i].next_grid_y == cy)) return nil
+         local c=creeps[i]
+         if c.alive then
+            if ((c.grid_x == cx) and (c.grid_y == cy)) return nil
+            if ((c.next_grid_x == cx) and (c.next_grid_y == cy)) return nil
          end
       end
 
       -- limit of 4 towers per column
       count = 0
       for ypos=1,14 do
-         if mget(cx, ypos) != 0 then
-            count += 1
-         end
+         if (mget(cx, ypos) != 0) count += 1
       end
       if (count > 3) return nil
 
@@ -111,8 +110,9 @@ function adapt_tower(cx, cy)
          end
       end
       for i=1,#creeps do
-         if creeps[i].alive and creeps[i].grid_x >= 0 then
-            if solution[creeps[i].grid_x][creeps[i].grid_y].reachable == false then
+         local c=creeps[i]
+         if c.alive and c.grid_x >= 0 then
+            if solution[c.grid_x][c.grid_y].reachable == false then
                solvable = false
                break
             end
@@ -129,22 +129,19 @@ function adapt_tower(cx, cy)
 
    mset(cx, cy, new)
 
-   if (new == 0) then
-      towers -= 1
-   end
+   if (new == 0) towers -= 1
 
    if (walkthrough_state == 2) walkthrough_state = 3
 end
 
 function activate(x, y)
    for i=1,#creeps do
-      if creeps[i].alive then
-         creeps[i].health -= 1
-         if creeps[i].health <= 0 then
-            creeps[i].alive = false
-            if walkthrough_state == 5 then
-               walkthrough_state = 6
-            end
+      local c=creeps[i]
+      if c.alive then
+         c.health -= 1
+         if c.health <= 0 then
+            c.alive = false
+            if (walkthrough_state == 5) walkthrough_state = 6
          end
       end
    end
@@ -218,33 +215,34 @@ function maybe_spawn_creep()
       walkthrough_state = 5
    end
 
-   -- TODO: actual creep spawning
+   -- TODO: actual creep wave spawning
 end
 
 function move_creeps()
    for i=1,#creeps do
-      if creeps[i].alive then
+      local c = creeps[i]
+      if c.alive then
          --we're not lined up with our next grid location; move to it
-         dest_x = creeps[i].next_grid_x * 8
-         dest_y = creeps[i].next_grid_y * 8
-         if creeps[i].x < dest_x then
-            creeps[i].x = min(dest_x, creeps[i].x + creeps[i].speed)
-         elseif creeps[i].x > dest_x then
-            creeps[i].x = max(dest_x, creeps[i].x - creeps[i].speed)
-         elseif creeps[i].y < dest_y then
-            creeps[i].y = min(dest_y, creeps[i].y + creeps[i].speed)
-         elseif creeps[i].y > dest_y then
-            creeps[i].y = max(dest_y, creeps[i].y - creeps[i].speed)
+         dest_x = c.next_grid_x * 8
+         dest_y = c.next_grid_y * 8
+         if c.x < dest_x then
+            c.x = min(dest_x, c.x + c.speed)
+         elseif c.x > dest_x then
+            c.x = max(dest_x, c.x - c.speed)
+         elseif c.y < dest_y then
+            c.y = min(dest_y, c.y + c.speed)
+         elseif c.y > dest_y then
+            c.y = max(dest_y, c.y - c.speed)
          else
             --we are lined up with our next grid location, so figure out the next step
-            creeps[i].grid_x = creeps[i].next_grid_x
-            creeps[i].grid_y = creeps[i].next_grid_y
-            if creeps[i].grid_x == 15 then
+            c.grid_x = c.next_grid_x
+            c.grid_y = c.next_grid_y
+            if c.grid_x == 15 then
                lives -= 1
-               creeps[i].alive = false
+               c.alive = false
             end
-            creeps[i].next_grid_x = solution[creeps[i].grid_x][creeps[i].grid_y].path_x
-            creeps[i].next_grid_y = solution[creeps[i].grid_x][creeps[i].grid_y].path_y
+            c.next_grid_x = solution[c.grid_x][c.grid_y].path_x
+            c.next_grid_y = solution[c.grid_x][c.grid_y].path_y
 
             --printh("aiming for (" .. creeps[i].next_grid_x .. ", " .. creeps[i].next_grid_y .. ")")
          end
@@ -291,12 +289,13 @@ function _draw()
 
     --creeps
     for i=1,#creeps do
-       if creeps[i].alive then
+       local c=creeps[i]
+       if c.alive then
           -- sprite
-          spr(creeps[i].sprite,creeps[i].x,creeps[i].y)
+          spr(c.sprite,c.x,c.y)
           -- health bar
-          line(creeps[i].x+1,creeps[i].y+1,creeps[i].x+6,creeps[i].y+1,8)
-          line(creeps[i].x+1,creeps[i].y+1,creeps[i].x+1+(5 * (creeps[i].health / creeps[i].max_health)),creeps[i].y+1,11)
+          line(c.x+1,c.y+1,c.x+6,c.y+1,8)
+          line(c.x+1,c.y+1,c.x+1+(5*c.health/c.max_health),c.y+1,11)
        end
     end
 
