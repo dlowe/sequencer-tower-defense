@@ -5,19 +5,19 @@
  * [x] creep damage / death
  * [ ] scorekeeping
  * [ ] increasing tower limit over time
- * [x] tower 1 attack
- * [ ] tower 2 attack
- * [ ] tower 3 attack
- * [ ] tower 4 attack
+ * [x] tower 1 attack (local bomb)
+ * [x] tower 2 attack (sniper)
+ * [x] tower 3 attack (remote bomb)
+ * [x] tower 4 attack (triple laser)
  * [ ] tower 1 sprites
  * [ ] tower 2 sprites
  * [ ] tower 3 sprites
  * [ ] tower 4 sprites
  * [ ] creep 1 sprites
- * [ ] creep 1 behavior
+ * [ ] creep 1 behavior (normal)
  * [ ] creep 2 sprites
- * [ ] creep 2 behavior
+ * [ ] creep 2 behavior (slow, high health)
  * [ ] creep 3 sprites
- * [ ] creep 3 behavior
+ * [ ] creep 3 behavior (fast, low health)
  * [x] waves: 8 second delay, then increasingly difficult waves of creeps
  * [x] creep death effect

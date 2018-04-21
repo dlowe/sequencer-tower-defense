@@ -68,6 +68,21 @@ function move_rings()
    rings = new_rings
 end
 
+-- projectiles
+projectiles = {}
+function move_projectiles()
+   local new_projectiles = {}
+   for i=1,#projectiles do
+      local p=projectiles[i]
+      if p.active_until > tick then
+         new_projectiles[#new_projectiles + 1] = p
+      else
+         --printh("despawning projectile " .. i)
+      end
+   end
+   projectiles = new_projectiles
+end
+
 solution = {}
 function solve()
    for x=0,16 do
@@ -200,12 +215,10 @@ function activate(x, y)
 
    if tower_type == 1 then
       -- thumper: hits nearby creeps hard
-      local thump = false
       for i=1,#creeps do
          local c = creeps[i]
          if c.alive then
             if (abs(c.grid_x - x) <= 2) and (abs(c.grid_y - y) <= 2) then
-               thump = true
                hurt_creep(i, 5)
             end
          end
@@ -219,8 +232,77 @@ function activate(x, y)
          active_until = tick + 6
       }
    elseif tower_type == 2 then
+      -- sniper: hits one target, infinite range, very high damage
+      for i=1,#creeps do
+         local c = creeps[i]
+         if c.alive then
+            hurt_creep(i, 20)
+            projectiles[#projectiles + 1] = {
+               x0           = x*8 + 4,
+               y0           = y*8 + 4,
+               x1           = c.x,
+               y1           = c.y,
+               col          = 8,
+               active_until = tick + 3,
+            }
+            break
+         end
+      end
    elseif tower_type == 3 then
+      -- remotebomb: targets one medium-distance creep with an area effect
+      for i=1,#creeps do
+         local c = creeps[i]
+         if c.alive then
+            if (abs(c.grid_x - x) <= 5) and (abs(c.grid_y - y) <= 5) then
+               for j=1,#creeps do
+                  local t = creeps[j]
+                  if (abs(t.grid_x - c.grid_x) <= 2) and (abs(t.grid_y - c.grid_y) <= 2) then
+                     hurt_creep(j, 8)
+                  end
+               end
+               projectiles[#projectiles + 1] = {
+                  x0  = x*8 + 4,
+                  y0  = y*8 + 4,
+                  x1  = c.x,
+                  y1  = c.y,
+                  col = 8,
+                  active_until = tick + 1,
+               }
+               rings[#rings + 1] = {
+                  x = c.x,
+                  y = c.y,
+                  col = 7,
+                  radius = 0.1,
+                  speed = 2,
+                  active_until = tick + 8
+               }
+               break
+            end
+         end
+      end
    elseif tower_type == 4 then
+      -- tri-laser: targets 3 medium-distance creeps with projectiles
+      local n_hit = 0
+      for i=1,#creeps do
+         local c = creeps[i]
+         if c.alive then
+            if (abs(c.grid_x - x) <= 6) and (abs(c.grid_y - y) <= 6) then
+               hurt_creep(i, 6)
+               projectiles[#projectiles + 1] = {
+                  x0           = x*8 + 4,
+                  y0           = y*8 + 4,
+                  x1           = c.x,
+                  y1           = c.y,
+                  col          = 5,
+                  active_until = tick + 3
+               }
+               n_hit += 1
+               if n_hit >= 3 then
+                  break
+               end
+            end
+         end
+      end
    end
 end
 
@@ -286,6 +368,7 @@ function maybe_spawn_creep()
       local spawn_y = 7
       while solution[0][spawn_y].reachable == false do
          spawn_y = flr(rnd(13)) + 1
+         printh("XXX: spawn_y=" .. spawn_y)
       end
       spawn_creep(spawn_y)
       walkthrough_state = 5
@@ -363,6 +446,7 @@ function _update()
    move_creeps()
    move_particles()
    move_rings()
+   move_projectiles()
 end
 
 function _draw()
@@ -413,6 +497,12 @@ function _draw()
     --rings
     for i=1,#rings do
        circ(rings[i].x, rings[i].y, rings[i].radius, rings[i].col)
+    end
+
+    --projectiles
+    for i=1,#projectiles do
+       local p=projectiles[i]
+       line(p.x0,p.y0,p.x1,p.y1,p.col)
     end
 
     --sequencer position
