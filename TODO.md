@@ -25,4 +25,4 @@
  * [x] increasing creep health over time
  * [ ] "rush" vs "spread out" spawning
  * [ ] pre-defined first few levels to introduce new creeps
- * [ ] reward perfect rhythm / punish button mashing
+ * [x] reward perfect rhythm / punish button mashing

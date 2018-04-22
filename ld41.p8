@@ -35,6 +35,8 @@ wave = 0
 wave_warn_tick = nil
 wave_begin_tick = nil
 wave_todo = 0
+wave_streak = true
+wave_miss = false
 
 -- game_over state
 game_over = false
@@ -338,6 +340,11 @@ function rhythm(tick, p)
 
    if (activated and (walkthrough_state == 3)) walkthrough_state = 4
 
+   if (not activated) then
+      --printh("MISSED")
+      wave_miss = true
+   end
+
    return activated
 end
 
@@ -359,9 +366,9 @@ function audio(p)
 end
 
 creep_types = {
-   { sprite = 16, speed = 0.4, max_health = 30,  particle_color = 9 },
-   { sprite = 17, speed = 0.1, max_health = 100, particle_color = 8 },
-   { sprite = 18, speed = 0.8, max_health = 12,  particle_color = 7 },
+   { sprite = 16, speed = 0.4,  max_health = 30,  particle_color = 9 },
+   { sprite = 17, speed = 0.18, max_health = 110, particle_color = 8 },
+   { sprite = 18, speed = 0.8,  max_health = 12,  particle_color = 7 },
 }
 
 creeps = {}
@@ -376,8 +383,8 @@ function spawn_creep(y, creep_type)
       alive          = true,
       sprite         = creep_types[creep_type].sprite,
       speed          = creep_types[creep_type].speed,
-      health         = creep_types[creep_type].max_health * (1.05 ^ max(1,wave)),
-      max_health     = creep_types[creep_type].max_health * (1.05 ^ max(1,wave)),
+      health         = creep_types[creep_type].max_health * (1.06 ^ max(1,wave)),
+      max_health     = creep_types[creep_type].max_health * (1.06 ^ max(1,wave)),
       particle_color = creep_types[creep_type].particle_color,
    }
 end
@@ -445,6 +452,8 @@ function move_creeps()
    if initial_n_creeps > 0 and #creeps == 0 then
       walkthrough_state = 6
       wave += 1
+      if (wave_miss == false) max_towers += 1
+      if (wave_streak == true) max_towers += 1
       max_towers += 1
       wave_todo = 2 * wave
       wave_warn_tick = tick + 60
@@ -457,10 +466,25 @@ function _init()
 end
 
 active = false
+want_activation     = false
+observed_activation = false
 function _update()
    tick += 1
    audio(position)
    position = (position + 1) % 128
+   if (position % 8) == 0 then
+      if want_activation and (not observed_activation) then
+         --printh("BROKEN STREAK")
+         wave_streak = false
+      end
+      local px = position / 8
+      for py=1,14 do
+         if (mget(px, py) != 0) then
+            want_activation     = true
+            observed_activation = false
+         end
+      end
+   end
    if game_over then
       if btnp(4) or btnp(5) then
          extcmd("reset")
@@ -474,6 +498,7 @@ function _update()
       if (btnp(3)) cursor_y = min(14,cursor_y + 1) moved = true
       if (btnp(4)) adapt_tower(cursor_x, cursor_y)
       if (btnp(5)) active = rhythm(tick, position)
+      if (active) observed_activation = true
       if (moved and walkthrough_state == 1) walkthrough_state = 2
       maybe_spawn_creep()
       move_creeps()
@@ -501,12 +526,23 @@ function _draw()
     elseif walkthrough_state != 6 then
        print(footer_text[walkthrough_state], 0, 122, 8)
     else
-       if tick > wave_begin_tick then
+       if tick >= wave_begin_tick then
+          if (tick == wave_begin_tick) then
+             wave_miss = false
+             wave_streak = true
+          end
           print("wave " .. wave .. " in progress", 0, 122, 8)
        elseif tick > wave_warn_tick then
           print("wave " .. wave .. " in " .. flr((wave_begin_tick - tick) / 30), 0, 122, 8)
        else
-          print("wave " .. (wave - 1) .. " clear!", 0, 122, 8)
+          local s = "wave " .. (wave - 1) .. " clear!";
+          if (wave_miss == false) then
+             s = s .. " ACCURATE!"
+          end
+          if (wave_streak == true) then
+             s = s .. " STREAK!"
+          end
+          print(s, 0, 122, 8)
        end
     end
 
