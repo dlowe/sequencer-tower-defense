@@ -341,7 +341,7 @@ function rhythm(tick, p)
    if (activated and (walkthrough_state == 3)) walkthrough_state = 4
 
    if (not activated) then
-      --printh("MISSED")
+      --printh("missed")
       wave_miss = true
    end
 
@@ -382,7 +382,7 @@ function spawn_creep(y, creep_type)
       y              = y*8,
       alive          = true,
       sprite         = creep_types[creep_type].sprite,
-      speed          = creep_types[creep_type].speed,
+      speed          = creep_types[creep_type].speed * (1.01 ^ max(1,wave)) + rnd(0.02),
       health         = creep_types[creep_type].max_health * (1.06 ^ max(1,wave)),
       max_health     = creep_types[creep_type].max_health * (1.06 ^ max(1,wave)),
       particle_color = creep_types[creep_type].particle_color,
@@ -474,7 +474,7 @@ function _update()
    position = (position + 1) % 128
    if (position % 8) == 0 then
       if want_activation and (not observed_activation) then
-         --printh("BROKEN STREAK")
+         --printh("broken streak")
          wave_streak = false
       end
       local px = position / 8
@@ -522,7 +522,7 @@ function _draw()
     --footer
     line(0,120,127,120,9)
     if game_over then
-       print(" GAME OVER (\142 or \151 to restart)", 0, 122, 8)
+       print(" game over (\142 or \151 to restart)", 0, 122, 8)
     elseif walkthrough_state != 6 then
        print(footer_text[walkthrough_state], 0, 122, 8)
     else
@@ -537,10 +537,10 @@ function _draw()
        else
           local s = "wave " .. (wave - 1) .. " clear!";
           if (wave_miss == false) then
-             s = s .. " ACCURATE!"
+             s = s .. " accurate!"
           end
           if (wave_streak == true) then
-             s = s .. " STREAK!"
+             s = s .. " streak!"
           end
           print(s, 0, 122, 8)
        end
