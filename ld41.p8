@@ -417,9 +417,9 @@ function audio(p)
 end
 
 creep_types = {
-   { sprite = 8,  speed = 0.4,  max_health = 32,  particle_color = 9 },
-   { sprite = 9,  speed = 0.18, max_health = 120, particle_color = 8 },
-   { sprite = 10, speed = 0.9,  max_health = 12,  particle_color = 7 },
+   { sprite = 8,  speed = 0.40, max_health = 32,  particle_color = 9 },
+   { sprite = 9,  speed = 0.18, max_health = 143, particle_color = 8 },
+   { sprite = 10, speed = 0.95, max_health = 13,  particle_color = 7 },
 }
 
 creeps = {}
@@ -513,7 +513,7 @@ function move_creeps()
       if (wave_miss == false) max_towers += 1
       if (wave_streak == true) max_towers += 1
       max_towers += 1
-      wave_todo = 2 * wave
+      wave_todo = flr(2 * wave * (1.05 ^ wave))
       wave_warn_tick = tick + 60
       wave_begin_tick = tick + 60 + 8 * 30
    end
