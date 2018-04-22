@@ -599,8 +599,6 @@ function _draw()
                    sprite = tower + 32
                    flip_x = true
                 end
-
-                printh("angle: " .. angle)
              end
 
              spr(sprite,x*8,y*8,1,1,flip_x,flip_y)
