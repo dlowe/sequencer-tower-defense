@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-FILE=$PWD/sequencer-tower-defense.p8
-
-cd /Applications/PICO-8.app/Contents/MacOS/
-exec /Applications/PICO-8.app/Contents/MacOS/pico8 -run $FILE
