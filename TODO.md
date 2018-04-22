@@ -15,11 +15,11 @@
  * [x] tower 3 sprites
  * [x] tower 4 sprites
  * [x] tower 5 sprites
- * [ ] creep 1 sprites
+ * [x] creep 1 sprites
  * [x] creep 1 behavior (normal)
- * [ ] creep 2 sprites
+ * [x] creep 2 sprites
  * [x] creep 2 behavior (slow, high health)
- * [ ] creep 3 sprites
+ * [x] creep 3 sprites
  * [x] creep 3 behavior (fast, low health)
  * [x] waves: 8 second delay, then increasingly difficult waves of creeps
  * [x] creep death effect
