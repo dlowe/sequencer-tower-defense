@@ -25,8 +25,8 @@
  * [x] creep death effect
  * [x] per-tower damage cap
  * [x] increasing creep health over time
- * [ ] "rush" vs "spread out" spawning
- * [ ] pre-defined first few levels to introduce new creeps
+ * [x] ~~~ "rush" vs "spread out" spawning ~~~
+ * [x] ~~~ pre-defined first few levels to introduce new creeps ~~~
  * [x] reward perfect rhythm / punish button mashing
  * [x] rotating / aiming tower sprites
  * [x] visual indicator of successfully triggering a tower with no targets
