@@ -1,10 +1,10 @@
  * [x] actual pathfinding (depth first is stupid)
  * [x] check pathfinding for active creeps when building towers (otherwise we can box them in)
  * [ ] game over behavior
- * [ ] lower tower limit from 99 to 13
+ * [x] lower tower limit from 99 to 12
  * [x] creep damage / death
- * [ ] scorekeeping
- * [ ] increasing tower limit over time
+ * [x] scorekeeping
+ * [x] increasing tower limit over time
  * [x] tower 1 attack (local bomb)
  * [x] tower 2 attack (sniper)
  * [x] tower 3 attack (remote bomb)
@@ -21,7 +21,7 @@
  * [x] creep 3 behavior (fast, low health)
  * [x] waves: 8 second delay, then increasingly difficult waves of creeps
  * [x] creep death effect
- * [ ] per-tower damage cap
- * [ ] increasing creep health over time
+ * [x] per-tower damage cap
+ * [x] increasing creep health over time
  * [ ] "rush" vs "spread out" spawning
  * [ ] pre-defined first few levels to introduce new creeps
