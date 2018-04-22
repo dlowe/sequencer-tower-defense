@@ -1,6 +1,6 @@
  * [x] actual pathfinding (depth first is stupid)
  * [x] check pathfinding for active creeps when building towers (otherwise we can box them in)
- * [ ] game over behavior
+ * [x] game over behavior
  * [x] lower tower limit from 99 to 12
  * [x] creep damage / death
  * [x] scorekeeping
@@ -25,3 +25,4 @@
  * [x] increasing creep health over time
  * [ ] "rush" vs "spread out" spawning
  * [ ] pre-defined first few levels to introduce new creeps
+ * [ ] reward perfect rhythm / punish button mashing

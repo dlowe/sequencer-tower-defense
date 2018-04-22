@@ -36,6 +36,9 @@ wave_warn_tick = nil
 wave_begin_tick = nil
 wave_todo = 0
 
+-- game_over state
+game_over = false
+
 -- particles
 particles = {}
 function move_particles()
@@ -425,6 +428,9 @@ function move_creeps()
             c.grid_y = c.next_grid_y
             if c.grid_x == 15 then
                escapes += 1
+               if escapes >= max_escapes then
+                  game_over = true
+               end
                hurt_creep(i, 999)
             end
             c.next_grid_x = solution[c.grid_x][c.grid_y].path_x
@@ -452,23 +458,29 @@ end
 
 active = false
 function _update()
-   active = false
    tick += 1
    audio(position)
    position = (position + 1) % 128
-   local moved = false
-   if (btnp(0)) cursor_x = max(0,cursor_x - 1) moved = true
-   if (btnp(1)) cursor_x = min(15,cursor_x + 1) moved = true
-   if (btnp(2)) cursor_y = max(1,cursor_y - 1) moved = true
-   if (btnp(3)) cursor_y = min(14,cursor_y + 1) moved = true
-   if (btnp(4)) adapt_tower(cursor_x, cursor_y)
-   if (btnp(5)) active = rhythm(tick, position)
-   if (moved and walkthrough_state == 1) walkthrough_state = 2
-   maybe_spawn_creep()
-   move_creeps()
-   move_particles()
-   move_rings()
-   move_projectiles()
+   if game_over then
+      if btnp(4) or btnp(5) then
+         extcmd("reset")
+      end
+   else
+      active = false
+      local moved = false
+      if (btnp(0)) cursor_x = max(0,cursor_x - 1) moved = true
+      if (btnp(1)) cursor_x = min(15,cursor_x + 1) moved = true
+      if (btnp(2)) cursor_y = max(1,cursor_y - 1) moved = true
+      if (btnp(3)) cursor_y = min(14,cursor_y + 1) moved = true
+      if (btnp(4)) adapt_tower(cursor_x, cursor_y)
+      if (btnp(5)) active = rhythm(tick, position)
+      if (moved and walkthrough_state == 1) walkthrough_state = 2
+      maybe_spawn_creep()
+      move_creeps()
+      move_particles()
+      move_rings()
+      move_projectiles()
+   end
 end
 
 function _draw()
@@ -484,7 +496,9 @@ function _draw()
 
     --footer
     line(0,120,127,120,9)
-    if walkthrough_state != 6 then
+    if game_over then
+       print(" GAME OVER (\142 or \151 to restart)", 0, 122, 8)
+    elseif walkthrough_state != 6 then
        print(footer_text[walkthrough_state], 0, 122, 8)
     else
        if tick > wave_begin_tick then
