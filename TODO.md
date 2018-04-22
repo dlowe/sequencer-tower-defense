@@ -9,10 +9,12 @@
  * [x] tower 2 attack (sniper)
  * [x] tower 3 attack (remote bomb)
  * [x] tower 4 attack (triple laser)
+ * [x] tower 5 attack (huge weak bomb)
  * [ ] tower 1 sprites
  * [ ] tower 2 sprites
  * [ ] tower 3 sprites
  * [ ] tower 4 sprites
+ * [ ] tower 5 sprites
  * [ ] creep 1 sprites
  * [x] creep 1 behavior (normal)
  * [ ] creep 2 sprites
