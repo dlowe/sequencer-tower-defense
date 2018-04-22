@@ -40,6 +40,7 @@ wave_miss = false
 
 -- game_over state
 game_over = false
+game_over_reset_tick = nil
 
 -- particles
 particles = {}
@@ -483,6 +484,7 @@ function move_creeps()
                escapes += 1
                if escapes >= max_escapes then
                   game_over = true
+                  game_over_reset_tick = tick + 30 * 4
                end
                hurt_creep(i, 999)
             end
@@ -531,9 +533,26 @@ function _update()
          end
       end
    end
+   move_creeps()
+   move_particles()
+   move_rings()
+   move_projectiles()
    if game_over then
-      if btnp(4) or btnp(5) then
-         extcmd("reset")
+      for n=1,flr(rnd(28)) do
+         particles[#particles + 1] = {
+            x=flr(rnd(108))+10,
+            y=flr(rnd(108))+10,
+            active_until=tick+10+flr(rnd(10)),
+            speed=rnd(5),
+            dx=rnd(3)-1,
+            dy=rnd(3)-1,
+            col=flr(rnd(16))
+         }
+      end
+      if tick >= game_over_reset_tick then
+         if btnp(4) or btnp(5) then
+            extcmd("reset")
+         end
       end
    else
       active = false
@@ -547,13 +566,10 @@ function _update()
       if (active) observed_activation = true
       if (moved and walkthrough_state == 1) walkthrough_state = 2
       maybe_spawn_creep()
-      move_creeps()
-      move_particles()
-      move_rings()
-      move_projectiles()
    end
 end
 
+last_walkthrough_state = nil
 function _draw()
     cls()
 
@@ -605,28 +621,41 @@ function _draw()
           end
        end
     end
-    --map(0,0,0,0)
 
     --header
-    print("towers: " .. towers .. "/" .. max_towers, 0, 1, 8)
-    print("escapes: " .. escapes .. "/" .. max_escapes, 80, 1, 8)
+    print("towers: " .. towers .. "/" .. max_towers, 0, 1, 7)
+    print("escapes: " .. escapes .. "/" .. max_escapes, 80, 1, 7)
     line(0,7,127,7,9)
 
     --footer
     line(0,120,127,120,9)
     if game_over then
-       print(" game over (\142 or \151 to restart)", 0, 122, 8)
+       print("game over", 0, 122, 8)
+       if (tick >= game_over_reset_tick) then
+          print("(\142 or \151 to restart)", 42, 122, 8)
+       end
     elseif walkthrough_state != 6 then
-       print(footer_text[walkthrough_state], 0, 122, 8)
+       if last_walkthrough_state != walkthrough_state then
+          last_walkthrough_state = walkthrough_state
+          rings[#rings + 1] = {
+             x = 15,
+             y = 124,
+             col = 11,
+             radius = 15,
+             speed = -0.4,
+             active_until = tick + 25
+          }
+       end
+       print(footer_text[walkthrough_state], 0, 122, 11)
     else
        if tick >= wave_begin_tick then
           if (tick == wave_begin_tick) then
              wave_miss = false
              wave_streak = true
           end
-          print("wave " .. wave .. " in progress", 0, 122, 8)
+          print("wave " .. wave .. " in progress", 0, 122, 6)
        elseif tick > wave_warn_tick then
-          print("wave " .. wave .. " in " .. flr((wave_begin_tick - tick) / 30), 0, 122, 8)
+          print("wave " .. wave .. " in " .. flr((wave_begin_tick - tick) / 30), 0, 122, 9)
        else
           local s = "wave " .. (wave - 1) .. " clear!";
           if (wave_miss == false) then
@@ -635,7 +664,7 @@ function _draw()
           if (wave_streak == true) then
              s = s .. " streak!"
           end
-          print(s, 0, 122, 8)
+          print(s, 0, 122, 12)
        end
     end
 

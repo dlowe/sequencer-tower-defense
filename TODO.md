@@ -30,3 +30,4 @@
  * [x] reward perfect rhythm / punish button mashing
  * [x] rotating / aiming tower sprites
  * [x] visual indicator of successfully triggering a tower with no targets
+ * [x] better game over (more obvious and not instaskippable)
