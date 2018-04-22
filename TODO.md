@@ -11,8 +11,8 @@
  * [x] tower 4 attack (triple laser)
  * [x] tower 5 attack (huge weak bomb)
  * [ ] tower 1 sprites
- * [ ] tower 2 sprites
- * [ ] tower 3 sprites
+ * [x] tower 2 sprites
+ * [x] tower 3 sprites
  * [ ] tower 4 sprites
  * [ ] tower 5 sprites
  * [ ] creep 1 sprites
@@ -28,3 +28,5 @@
  * [ ] "rush" vs "spread out" spawning
  * [ ] pre-defined first few levels to introduce new creeps
  * [x] reward perfect rhythm / punish button mashing
+ * [x] rotating / aiming tower sprites
+ * [x] visual indicator of successfully triggering a tower with no targets
